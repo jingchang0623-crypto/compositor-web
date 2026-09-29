@@ -5,11 +5,21 @@ import type { Adjustment, LayerRecord, LayerTransform, Manifest, Sampling } from
 import { BLEND_MODES } from '../model/manifest'
 import { invert3, renderList, unitToDocument, type DrawStep } from '../model/renderList'
 import { adjustmentTable } from './adjustments'
+import { RasterSource, TILE, type GpuSource } from './raster'
 import { mipLevels, mul3, Program, Target } from './gl'
 import { FULLSCREEN_VS, KIND, LAYER_FS, MAX_MASKS, PRESENT_FS } from './shaders'
 
-/** Decoded pixels: an ImageBitmap (premultiplied RGBA, or gray for a mask), or raw bytes of the same. */
-export type PixelSource = ImageBitmap | { width: number; height: number; data: Uint8Array }
+/** Raw pixels: premultiplied RGBA, or gray bytes for a mask, top row first. */
+export interface RawSource {
+  readonly width: number
+  readonly height: number
+  readonly data: Uint8Array
+}
+/**
+ * Pixels a layer or mask can show: decoded from a file (ImageBitmap), raw bytes, tiles the editor changed, or a
+ * texture being painted right now.
+ */
+export type PixelSource = ImageBitmap | RawSource | RasterSource | GpuSource
 
 /** Where a document's images come from, by file name inside `images/`. */
 export interface AssetStore {
@@ -75,6 +85,14 @@ export class Compositor {
   /** The GPU copy of `source`, uploaded on first use with mipmaps for zooming out. */
   texture(source: PixelSource, mask: boolean, sampling: Sampling = 'High quality'): WebGLTexture {
     const gl = this.gl
+    const nearest = sampling === 'Nearest'
+    if ('texture' in source) {
+      // Being painted: its mipmaps are stale until the stroke ends, so it's sampled at full size.
+      gl.bindTexture(gl.TEXTURE_2D, source.texture)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, nearest ? gl.NEAREST : gl.LINEAR)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, nearest ? gl.NEAREST : gl.LINEAR)
+      return source.texture
+    }
     let texture = this.textures.get(source)?.texture
     if (!texture) {
       texture = gl.createTexture()!
@@ -87,7 +105,10 @@ export class Compositor {
       gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, !mask)
       gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
       const format = mask ? gl.RED : gl.RGBA
-      if ('data' in source) {
+      if (source instanceof RasterSource) {
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
+        this.uploadTiles(source, format)
+      } else if ('data' in source) {
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false) // Raw bytes arrive premultiplied already.
         gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, source.width, source.height, format, gl.UNSIGNED_BYTE, source.data)
       } else {
@@ -101,10 +122,63 @@ export class Compositor {
       this.textureBytes += bytes
     }
     gl.bindTexture(gl.TEXTURE_2D, texture)
-    const nearest = sampling === 'Nearest'
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, nearest ? gl.NEAREST_MIPMAP_NEAREST : gl.LINEAR_MIPMAP_LINEAR)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, nearest ? gl.NEAREST : gl.LINEAR)
     return texture
+  }
+
+  private fillTiles = new Map<string, Uint8Array>()
+  private uploadTiles(source: RasterSource, format: number) {
+    const gl = this.gl
+    for (let r = 0; r < source.rows; r++)
+      for (let c = 0; c < source.cols; c++) {
+        const [tw, th] = source.tileSize(c, r)
+        let data = source.tiles[r * source.cols + c]
+        if (!data) {
+          if (source.fill === 0) continue // WebGL clears new storage to zero.
+          const key = `${source.channels}:${source.fill}`
+          let fill = this.fillTiles.get(key)
+          if (!fill) {
+            fill = new Uint8Array(TILE * TILE * source.channels).fill(source.fill)
+            this.fillTiles.set(key, fill)
+          }
+          data = fill
+        }
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, c * TILE, r * TILE, tw, th, format, gl.UNSIGNED_BYTE, data)
+      }
+  }
+
+  /** Hands `texture` (already holding `source`'s pixels, at full size) to the cache, so it isn't uploaded again. */
+  adopt(source: RasterSource, texture: WebGLTexture) {
+    const gl = this.gl
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+    gl.generateMipmap(gl.TEXTURE_2D)
+    const bytes = Math.round(source.width * source.height * source.channels * (4 / 3))
+    this.textures.set(source, { texture, bytes })
+    this.textureBytes += bytes
+  }
+
+  /** The texture already made for `source`, if any. */
+  existing(source: PixelSource): WebGLTexture | undefined {
+    return 'texture' in source ? source.texture : this.textures.get(source)?.texture
+  }
+
+  /** Reads a region of a texture's full-size level: RGBA, or its red channel alone for a mask. Top row first. */
+  readTexture(texture: WebGLTexture, x: number, y: number, w: number, h: number, mask: boolean): Uint8Array {
+    const gl = this.gl
+    const fb = gl.createFramebuffer()!
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0)
+    const rgba = new Uint8Array(w * h * 4)
+    gl.pixelStorei(gl.PACK_ALIGNMENT, 1)
+    gl.readPixels(x, y, w, h, gl.RGBA, gl.UNSIGNED_BYTE, rgba)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+    gl.deleteFramebuffer(fb)
+    // Texture rows are stored as uploaded (top row first), so this read is already top-down.
+    if (!mask) return rgba
+    const gray = new Uint8Array(w * h)
+    for (let i = 0; i < gray.length; i++) gray[i] = rgba[i * 4]
+    return gray
   }
 
   /** Lets go of every texture made from a source not in `keep`. */

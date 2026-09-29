@@ -4,10 +4,10 @@ import type { FrameStats } from '../bench/bench'
 import { runBench, type BenchReport } from '../bench/runBench'
 import { CanvasView } from './CanvasView'
 import { OptionsBar, StatusBar, TitleBar, ToolRail } from './Chrome'
-import { actualPixels, fit, openDrop, openURL, pickFolder, zoomStep } from './commands'
+import { importImages, openDrop, openURL } from './commands'
+import { handleKey } from './keys'
 import { LayersPanel } from './LayersPanel'
-import { setError, setTool, useEditor } from './store'
-import { toolByKey } from './tools'
+import { setError, useEditor } from './store'
 import { Welcome } from './Welcome'
 
 const params = new URLSearchParams(location.search)
@@ -16,6 +16,7 @@ export function App() {
   const hasTabs = useEditor((s) => s.tabs.length > 0)
   const busy = useEditor((s) => s.busy)
   const error = useEditor((s) => s.error)
+  const notice = useEditor((s) => s.notice)
   const [dropping, setDropping] = useState(false)
   const [bench, setBench] = useState<BenchReport | null>(null)
 
@@ -39,33 +40,33 @@ export function App() {
   }, [bench$])
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const typing = e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement
-      if (e.metaKey || e.ctrlKey) {
-        const handled: Record<string, () => void> = {
-          '0': fit, '1': actualPixels, '=': () => zoomStep(1), '+': () => zoomStep(1), '-': () => zoomStep(-1), o: pickFolder,
-        }
-        const action = handled[e.key.toLowerCase()]
-        if (action && !e.altKey && !e.shiftKey) {
-          e.preventDefault()
-          action()
-        }
-        return
-      }
-      if (typing || e.altKey || e.repeat) return
-      const tool = toolByKey(e.key)
-      if (tool) setTool(tool)
+    window.addEventListener('keydown', handleKey)
+    // Paste an image as a new layer above the active one.
+    const onPaste = (e: ClipboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      const files = Array.from(e.clipboardData?.files ?? []).filter((f) => f.type.startsWith('image/'))
+      if (!files.length) return
+      e.preventDefault()
+      void importImages(files, undefined, true)
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('paste', onPaste)
+    return () => {
+      window.removeEventListener('keydown', handleKey)
+      window.removeEventListener('paste', onPaste)
+    }
   }, [])
 
   return (
     <div
       className="app"
-      onDragOver={(e) => { e.preventDefault(); setDropping(true) }}
+      onDragOver={(e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); setDropping(true) } }}
       onDragLeave={(e) => { if (e.currentTarget === e.target) setDropping(false) }}
-      onDrop={(e) => { e.preventDefault(); setDropping(false); openDrop(e.dataTransfer) }}
+      onDrop={(e) => {
+        e.preventDefault()
+        setDropping(false)
+        if (e.dataTransfer.types.includes('text/x-layer')) return // A layer dragged in the panel, dropped elsewhere.
+        openDrop(e.dataTransfer, e.clientX, e.clientY)
+      }}
     >
       <TitleBar onBench={() => void bench$()} />
       <OptionsBar />
@@ -82,7 +83,8 @@ export function App() {
             </div>
           )}
           {bench && <BenchCard report={bench} onClose={() => setBench(null)} />}
-          {dropping && <div className="drop-target">松开以打开 .comp</div>}
+          {notice && <div className="notice" role="status">{notice}</div>}
+          {dropping && <div className="drop-target">松开以打开 .comp，或把图片放进画布</div>}
         </main>
         <LayersPanel />
       </div>

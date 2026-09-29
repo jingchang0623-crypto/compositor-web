@@ -12,12 +12,16 @@ export interface LoadedProject {
   name: string
   manifest: Manifest
   assets: Map<string, PixelSource>
+  /** The package's files as read, so a save can write unchanged images back without encoding them again. */
+  files?: PackageFiles
+  /** Where the package came from, when it can be written back in place (Chromium's File System Access). */
+  folder?: FileSystemDirectoryHandle
   /** `QuickLook/Preview.jpg`, which the desktop app writes on every save: a reference for checking our rendering. */
   preview?: ImageBitmap
   warnings: string[]
 }
 
-export function assetStore(assets: Map<string, PixelSource>): AssetStore {
+export function assetStore(assets: ReadonlyMap<string, PixelSource>): AssetStore {
   return { get: (file) => assets.get(file) }
 }
 
@@ -112,5 +116,5 @@ export async function loadProject(files: PackageFiles, name: string, maxTextureS
 
   const previewBlob = files.get('QuickLook/Preview.jpg')
   const preview = previewBlob ? await createImageBitmap(previewBlob, { colorSpaceConversion: 'none' }) : undefined
-  return { name, manifest, assets, preview, warnings: [...new Set(warnings)] }
+  return { name, manifest, assets, files, preview, warnings: [...new Set(warnings)] }
 }

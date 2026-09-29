@@ -2,8 +2,10 @@
 
 import { ArrowLeftRight, Ellipsis, Plus, X, ZoomIn, ZoomOut } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { actualPixels, fit, zoomCentered, zoomStep } from './commands'
-import { activateTab, activeTab, activeView, closeTab, setTool, useEditor } from './store'
+import { addAdjustment, addBlankLayer, addFolder, addMask, deleteLayer, deleteMask, duplicateLayer, groupActive, ungroupActive } from './actions'
+import { actualPixels, downloadZip, exportImage, fit, pickFolder, pickImages, pickZip, save, zoomCentered, zoomStep } from './commands'
+import { deselect, inverseSelection, selectAllCanvas } from './selectionActions'
+import { activateTab, activeLayer, activeTab, activeView, closeTab, redo, setTool, undo, useEditor } from './store'
 import { IDLE_HINT, TOOLS } from './tools'
 import { formatZoom } from './viewport'
 import { Welcome } from './Welcome'
@@ -19,6 +21,7 @@ export function TitleBar({ onBench }: { onBench: () => void }) {
   return (
     <header className="titlebar">
       <span className="brand">Compositor</span>
+      <MenuBar />
       <div className="popover-anchor">
         <button className="icon" title="新建画布或打开项目" onClick={() => setNewOpen((o) => !o)}><Plus size={16} /></button>
         {newOpen && (
@@ -43,6 +46,7 @@ export function TitleBar({ onBench }: { onBench: () => void }) {
             }}
           >
             <span className="tab-name">{t.name}</span>
+            {t.history.isModified && <span className="edited" title="有未保存的改动" aria-label="有未保存的改动">•</span>}
             <button className="tab-close" title={`关闭 ${t.name}`} aria-label={`关闭 ${t.name}`} onPointerDown={(e) => e.stopPropagation()} onClick={() => closeTab(t.id)}>
               <X size={12} />
             </button>
@@ -68,6 +72,83 @@ export function TitleBar({ onBench }: { onBench: () => void }) {
         </div>
       </div>
     </header>
+  )
+}
+
+interface MenuItem {
+  label: string
+  keys?: string
+  run?: () => void
+  disabled?: boolean
+}
+type MenuEntry = MenuItem | 'separator'
+
+/** The desktop app's menus, in a row: File, Edit, Layer, Select. */
+function MenuBar() {
+  const tab = useEditor(activeTab)
+  const layer = useEditor(activeLayer)
+  const [open, setOpen] = useState<string | null>(null)
+  const doc = !!tab
+  const menus: [string, MenuEntry[]][] = [
+    ['文件', [
+      { label: '打开 .comp 文件夹…', keys: '⌘O', run: () => void pickFolder() },
+      { label: '打开 zip…', run: pickZip },
+      { label: '打开图片…', keys: '⇧⌘O', run: pickImages },
+      'separator',
+      { label: '保存', keys: '⌘S', run: () => void save(), disabled: !doc },
+      { label: '另存为…', keys: '⇧⌘S', run: () => void save(true), disabled: !doc },
+      { label: '下载 .comp（zip）', run: () => void downloadZip(), disabled: !doc },
+      'separator',
+      { label: '导出 PNG', run: () => void exportImage('image/png'), disabled: !doc },
+      { label: '导出 JPEG', keys: '⇧⌥⌘S', run: () => void exportImage('image/jpeg'), disabled: !doc },
+      'separator',
+      { label: '关闭', run: () => tab && closeTab(tab.id), disabled: !doc },
+    ]],
+    ['编辑', [
+      { label: tab?.history.canUndo ? `撤销${tab.history.undoName}` : '撤销', keys: '⌘Z', run: undo, disabled: !tab?.history.canUndo },
+      { label: tab?.history.canRedo ? `重做${tab.history.redoName}` : '重做', keys: '⇧⌘Z', run: redo, disabled: !tab?.history.canRedo },
+    ]],
+    ['图层', [
+      { label: '新建图层', keys: '⌥⇧⌘N', run: addBlankLayer, disabled: !doc },
+      { label: '新建文件夹', run: addFolder, disabled: !doc },
+      { label: '复制图层', keys: '⌘J', run: () => duplicateLayer(), disabled: !layer },
+      { label: '删除图层', run: () => deleteLayer(), disabled: !layer },
+      'separator',
+      { label: '编组', keys: '⌘G', run: groupActive, disabled: !layer },
+      { label: '取消编组', keys: '⇧⌘G', run: ungroupActive, disabled: !layer?.isGroup },
+      'separator',
+      { label: layer?.maskFile ? '删除蒙版' : '添加蒙版', run: () => (layer?.maskFile ? deleteMask() : addMask()), disabled: !layer || layer.isGroup },
+      'separator',
+      ...(['Levels', 'Curves', 'Hue/Saturation', 'Exposure', 'Invert'] as const).map((k) => ({ label: `新建调整图层：${k}`, run: () => addAdjustment(k), disabled: !doc })),
+    ]],
+    ['选择', [
+      { label: '全选', keys: '⌘A', run: selectAllCanvas, disabled: !doc },
+      { label: '取消选择', keys: '⌘D', run: deselect, disabled: !tab?.selection },
+      { label: '反选', keys: '⇧⌘I', run: inverseSelection, disabled: !tab?.selection },
+    ]],
+  ]
+  return (
+    <nav className="menubar" aria-label="菜单">
+      {menus.map(([name, items]) => (
+        <div key={name} className="popover-anchor" onPointerEnter={() => open && setOpen(name)}>
+          <button className={`menu-title${open === name ? ' open' : ''}`} onClick={() => setOpen(open === name ? null : name)} aria-haspopup="menu" aria-expanded={open === name}>
+            {name}
+          </button>
+          {open === name && (
+            <Popover onClose={() => setOpen(null)}>
+              <div className="menu" role="menu">
+                {items.map((item, i) => item === 'separator' ? <hr key={i} /> : (
+                  <button key={item.label} role="menuitem" disabled={item.disabled} onClick={() => { setOpen(null); item.run?.() }}>
+                    <span>{item.label}</span>
+                    {item.keys && <kbd>{item.keys}</kbd>}
+                  </button>
+                ))}
+              </div>
+            </Popover>
+          )}
+        </div>
+      ))}
+    </nav>
   )
 }
 

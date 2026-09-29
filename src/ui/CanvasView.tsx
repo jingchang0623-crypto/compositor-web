@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CanvasRenderer } from '../engine/canvasRenderer'
 import { Compositor, type View } from '../engine/compositor'
 import { compareWithPreview } from '../io/compare'
-import { activeTab, activeView, setComparison, setError, setView, subscribe, useEditor, type Tab } from './store'
+import { activeTab, activeView, onRelease, setComparison, setError, setView, subscribe, useEditor, type Tab } from './store'
 import { fitView, keyboardZoomTarget, zoomTo } from './viewport'
 
 /** The one GPU context, shared by the canvas, the benchmark and preview comparisons. */
@@ -27,6 +27,8 @@ export function CanvasView() {
       engine.compositor ??= new Compositor(canvas)
       engine.renderer ??= new CanvasRenderer(engine.compositor)
       engine.canvas = canvas
+      // Textures for pixels no tab or undo step can show again are let go.
+      onRelease((keep) => engine.compositor?.retainOnly(keep))
     } catch (e) {
       setError(String(e))
       return

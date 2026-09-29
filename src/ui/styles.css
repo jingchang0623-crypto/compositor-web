@@ -203,3 +203,28 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px s
 .report table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
 .report th, .report td { text-align: left; padding: 4px 10px; border-bottom: 1px solid var(--line); }
 .report th { color: var(--muted); font-weight: 500; }
+
+/* MARK: G2 — menus, editing */
+
+.menubar { display: flex; gap: 0; margin-right: 4px; }
+.menu-title { height: 28px; padding: 0 9px; background: none; border-color: transparent; color: var(--text); }
+.menu-title:hover, .menu-title.open { background: var(--hover); border-color: transparent; }
+.menu button { justify-content: space-between; gap: 24px; }
+.menu button:disabled { opacity: 0.35; }
+.menu kbd { font: inherit; color: var(--faint); font-variant-numeric: tabular-nums; }
+.menu hr { border: 0; border-top: 1px solid var(--line); margin: 4px 6px; }
+.menu-pop { bottom: calc(100% + 6px); top: auto; }
+.tab .edited { color: var(--muted); margin-left: -2px; }
+
+.notice {
+  position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); padding: 6px 12px; pointer-events: none;
+  background: rgba(20, 20, 22, 0.88); border: 1px solid var(--line); border-radius: 8px; color: var(--text);
+}
+
+.thumb-slot.target .thumb { outline: 2px solid var(--text); outline-offset: 1px; }
+.layer-row.dragging { opacity: 0.4; }
+.layer-row.drop-above { box-shadow: inset 0 2px 0 var(--accent); }
+.layer-row.drop-below { box-shadow: inset 0 -2px 0 var(--accent); }
+.layer-row.drop-into { background: rgba(79, 140, 255, 0.18); }
+.layer-name { cursor: default; }
+.rename { width: 100%; height: 22px; }
