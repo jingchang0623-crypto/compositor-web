@@ -11,6 +11,8 @@ npm run dev        # http://localhost:5173
 npm test           # 单元测试（manifest 校验、渲染顺序、变换、调整层数学）
 npm run build      # 纯静态站点，产物在 dist/
 npm run fixture    # 重新生成 public/fixtures/demo.comp(.zip)
+npm run g3:materials  # 重新生成 G3 测试素材（public/g3/）
+npm run g3:doc     # 从 src/g3/questions.ts 生成 docs/g3/questionnaire.md
 ```
 
 ## 页面
@@ -21,6 +23,7 @@ npm run fixture    # 重新生成 public/fixtures/demo.comp(.zip)
 | `/?open=/fixtures/demo.comp.zip` | 直接打开一个 zip 的 `.comp` |
 | `/?test=blend` | G0.1：24 种混合模式、5 种调整层、渲染方向，GPU 对 CPU 参考逐像素比对 |
 | `/?bench=1` | G0.2 / G0.3：生成 20 层 4000×3000 文档并测帧时（可加 `&layers=&w=&h=`） |
+| `/?g3=task` · `survey` · `observe` · `results` | G3 用户测试：任务卡、问卷、观察记录、汇总（见 [docs/g3](docs/g3/README.md)） |
 
 ## 能做什么（G2）
 

@@ -1,0 +1,79 @@
+/* The G3 pages: plain reading pages in the editor's dark theme, scrolling as documents do. */
+html:has(.g3), html:has(.g3) body, html:has(.g3) #root { overflow: auto; height: auto; min-height: 100%; }
+.g3 { max-width: 760px; margin: 0 auto; padding: 32px 20px 64px; display: grid; gap: 16px; font-size: 14px; line-height: 1.6; }
+.g3.wide { max-width: 1040px; }
+.g3 h1 { margin: 4px 0 8px; font-size: 26px; font-weight: 650; }
+.g3 h2 { margin: 0 0 10px; font-size: 15px; font-weight: 600; }
+.g3 p { margin: 0 0 8px; }
+.g3 ul, .g3 ol { margin: 0; padding-left: 20px; }
+.g3 .note { color: var(--muted); font-size: 13px; }
+.g3 code { font-size: 12px; background: var(--raised); padding: 1px 5px; border-radius: 4px; }
+.g3 .kicker { color: var(--accent); font-size: 12px; font-weight: 600; letter-spacing: 0.02em; }
+.g3-head p { color: var(--muted); max-width: 62ch; }
+.g3-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+.g3-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.g3 a.button, .g3 button { display: inline-flex; align-items: center; height: 32px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--raised); color: var(--text); text-decoration: none; font-size: 13px; cursor: pointer; }
+.g3 a.button.primary, .g3 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.g3-preview { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+.g3-preview figure { margin: 0; }
+.g3-preview img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); display: block; }
+.g3-preview figcaption { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.g3-tasks { display: grid; gap: 10px; }
+.g3-tasks li { display: grid; gap: 2px; }
+.g3-tasks span { color: var(--muted); }
+
+.g3-q { border: 0; margin: 0 0 18px; padding: 0; min-width: 0; display: grid; gap: 8px; }
+.g3-q:last-child { margin-bottom: 0; }
+.g3-q-text { padding: 0; font-weight: 500; }
+.g3-q.missing .g3-q-text::after { content: '  ← 这题还没答'; color: var(--bad); font-weight: 400; font-size: 12px; }
+.g3-q input:not([type]), .g3-q input[type='text'], .g3 textarea { width: 100%; background: #1e1e20; border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; color: var(--text); font: inherit; }
+.g3-q input:not([type]) { max-width: 160px; }
+.g3-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.g3-options label { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.g3-options label.on { border-color: var(--accent); background: rgba(79, 140, 255, 0.12); }
+.g3-options label.dim { opacity: 0.45; }
+.g3-options input { accent-color: var(--accent); margin: 0; }
+.g3-scale { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.g3-scale button { width: 36px; justify-content: center; padding: 0; }
+.g3-scale button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.g3-scale .end { color: var(--muted); font-size: 12px; padding: 0 6px; }
+.g3-submit { position: sticky; bottom: 0; display: flex; align-items: center; gap: 12px; justify-content: flex-end; padding: 12px 0; background: linear-gradient(transparent, var(--window) 30%); }
+.g3-submit .note { margin-right: auto; }
+
+.g3-nav { display: flex; gap: 14px; font-size: 13px; }
+.g3-nav a { color: var(--muted); text-decoration: none; }
+.g3-nav a[aria-current='true'] { color: var(--text); font-weight: 600; }
+.g3-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.g3-grid label { display: grid; gap: 4px; color: var(--muted); font-size: 12px; }
+.g3-grid input, .g3-grid select { height: 30px; background: #1e1e20; border: 1px solid var(--line); border-radius: 6px; padding: 0 8px; color: var(--text); font: inherit; font-size: 13px; }
+.g3-task-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.g3-task-head h2 { margin: 0; }
+.g3-task-head button { font-variant-numeric: tabular-nums; min-width: 110px; justify-content: center; }
+.g3-incident { display: flex; gap: 8px; margin-bottom: 8px; }
+.g3-incident input { flex: 1; height: 32px; background: #1e1e20; border: 1px solid var(--line); border-radius: 6px; padding: 0 9px; color: var(--text); font: inherit; }
+.g3-incidents { margin-bottom: 14px !important; }
+
+.g3-drop { display: grid; place-items: center; min-height: 110px; border: 2px dashed var(--line); border-radius: 12px; color: var(--muted); cursor: pointer; position: relative; }
+.g3-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.g3-verdict { display: grid; gap: 4px; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); }
+.g3-verdict strong { font-size: 18px; }
+.g3-verdict.green { border-color: rgba(62, 207, 142, 0.6); }
+.g3-verdict.yellow { border-color: rgba(245, 185, 66, 0.6); }
+.g3-verdict.red { border-color: rgba(255, 107, 107, 0.6); }
+.g3-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.g3-metrics div { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 2px; }
+.g3-metrics span, .g3-metrics em { color: var(--muted); font-size: 12px; font-style: normal; }
+.g3-metrics strong { font-size: 26px; font-variant-numeric: tabular-nums; }
+.g3-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.g3-table th, .g3-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line-soft); }
+.g3-table th { color: var(--muted); font-weight: 500; }
+.g3-bars { list-style: none; padding: 0 !important; display: grid; gap: 6px; margin-bottom: 16px !important; }
+.g3-bars li { display: grid; grid-template-columns: 220px 1fr 32px; align-items: center; gap: 10px; font-size: 13px; }
+.g3-bars .bar { height: 10px; background: var(--accent); border-radius: 5px; min-width: 2px; }
+.g3-bars em { font-style: normal; color: var(--muted); text-align: right; }
+.g3-voice { border-top: 1px solid var(--line-soft); padding-top: 10px; margin-top: 10px; }
+.g3-voice em { color: var(--muted); font-style: normal; }
+@media (max-width: 560px) {
+  .g3-preview { grid-template-columns: 1fr; }
+  .g3-bars li { grid-template-columns: 1fr 60px 24px; }
+}

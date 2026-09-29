@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "fixture": "node tools/make-comp.mjs"
+    "fixture": "node tools/make-comp.mjs",
+    "g3:doc": "node --experimental-strip-types --no-warnings tools/g3-doc.mjs",
+    "g3:materials": "node tools/make-g3.mjs"
   },
   "dependencies": {
     "fflate": "^0.8.3",
@@ -22,6 +24,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "jpeg-js": "^0.4.4",
     "pngjs": "^7.0.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.1",
