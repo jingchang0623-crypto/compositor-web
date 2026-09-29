@@ -1,7 +1,7 @@
 # Compositor Web
 
 [Compositor](https://github.com/robbietilton/Compositor)（macOS 开源修图/合成工具，MIT）的 Web 版。
-目标与验收见 [GOALS.md](GOALS.md)。
+目标与验收见 [GOALS.md](GOALS.md)。在线试用：https://jingchang0623-crypto.github.io/compositor-web/
 
 ## 运行
 
