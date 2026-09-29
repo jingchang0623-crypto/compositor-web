@@ -6,6 +6,7 @@ import { CanvasView } from './CanvasView'
 import { OptionsBar, StatusBar, TitleBar, ToolRail } from './Chrome'
 import { importImages, openDrop, openURL } from './commands'
 import { handleKey } from './keys'
+import { AdjustmentPanel } from './AdjustmentPanel'
 import { LayersPanel } from './LayersPanel'
 import { Overlay } from './Overlay'
 import { setError, useEditor } from './store'
@@ -76,6 +77,7 @@ export function App() {
         <main className="stage">
           <CanvasView />
           <Overlay />
+          <AdjustmentPanel />
           {!hasTabs && !busy && <div className="welcome-wrap"><Welcome /></div>}
           {busy && <div className="busy">{busy}</div>}
           {error && (

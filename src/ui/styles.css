@@ -250,3 +250,28 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px s
 .segmented { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
 .segmented button { border: 0; border-radius: 0; height: 24px; background: transparent; color: var(--muted); }
 .segmented button[aria-pressed='true'] { background: var(--raised); color: var(--text); }
+
+.card.adjust { width: 300px; top: 14px; right: 14px; }
+.card.adjust header { gap: 8px; justify-content: flex-start; }
+.card.adjust header .sub { color: var(--faint); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card.bench { top: auto; bottom: 14px; }
+.adjust-body { display: grid; gap: 10px; }
+.adjust-body .note, .card .note { margin: 0; color: var(--faint); }
+.field-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.slider-row { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; }
+.slider-row input[type='range'] { accent-color: var(--accent); min-width: 0; }
+.histogram { width: 100%; height: auto; background: #1a1a1c; border-radius: 4px; }
+.histogram path { fill: #8a8a92; }
+.histogram .marker { stroke: #777; stroke-width: 1; }
+.histogram .marker.black { fill: #000; }
+.histogram .marker.gamma { fill: #888; }
+.histogram .marker.white { fill: #fff; }
+.curves { width: 100%; aspect-ratio: 1; background: #1a1a1c; border-radius: 4px; cursor: crosshair; touch-action: none; }
+.curves .hist { fill: #3a3a3f; }
+.curves .grid { stroke: #2e2e33; stroke-width: 1; }
+.curves .diagonal { stroke: #444; stroke-width: 1; }
+.curves .curve { fill: none; stroke: #e8e8ea; stroke-width: 1.5; }
+.curves .curve.ch1 { stroke: #ff6b6b; }
+.curves .curve.ch2 { stroke: #3ecf8e; }
+.curves .curve.ch3 { stroke: #4f8cff; }
+.curves circle { fill: #e8e8ea; stroke: #111; stroke-width: 1; }

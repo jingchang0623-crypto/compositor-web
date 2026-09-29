@@ -114,6 +114,9 @@ export class Compositor {
       } else {
         gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, source.width, source.height, format, gl.UNSIGNED_BYTE, source)
       }
+      // Back to the defaults: WebGL2 refuses array uploads to 3D textures while premultiplying is on, which left
+      // every Hue/Saturation cube made after an image upload blank (and the canvas black under it).
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
       gl.generateMipmap(gl.TEXTURE_2D)
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
@@ -197,6 +200,9 @@ export class Compositor {
     const table = adjustmentTable(adjustment)
     let made: TableTexture | null = null
     const gl = this.gl
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4)
     if (table?.kind === 'channels') {
       const texture = gl.createTexture()!
       gl.bindTexture(gl.TEXTURE_2D, texture)

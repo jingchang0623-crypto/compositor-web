@@ -129,6 +129,23 @@ export function runBlendTests(): TestRow[] {
       return [0, 1, 2].map((c) => (rgb[c] + (Math.min(1, Math.max(0, adjusted[c])) - rgb[c]) * opacity) * b[3]).concat(b[3])
     }))
   }
+  // A cube made after an image went up the ordinary way (ImageBitmap, premultiplied on upload): the upload must leave
+  // the pixel-store state as it found it, or WebGL2 refuses the cube and the adjustment turns everything black.
+  {
+    const canvas = new OffscreenCanvas(SIZE, SIZE)
+    const g = canvas.getContext('2d')!
+    g.fillStyle = 'rgb(200, 90, 40)'
+    g.fillRect(0, 0, SIZE, SIZE)
+    const bitmap = canvas.transferToImageBitmap()
+    const withBitmap = new Map<string, PixelSource>([['P.png', bitmap]])
+    const adjustment: Adjustment = { kind: 'Hue/Saturation', hue: 20, saturation: 40, lightness: 0, colorize: false }
+    const d = doc([layer('P', { imageFile: 'P.png' }), layer('A', { adjustment })])
+    const gpu = compositor.read(compositor.composite(d, { get: (f) => withBitmap.get(f) }, SIZE, SIZE, view, 'test'))
+    const table = adjustmentTable(adjustment)!
+    const expected = applyTable(table, [200 / 255, 90 / 255, 40 / 255])
+    rows.push(compare('Adjust after image upload', gpu, () => [...expected.map((v) => Math.min(1, Math.max(0, v))), 1]))
+    bitmap.close()
+  }
   compositor.releaseSurfaces('test')
   return [...rows, ...orientationTests()]
 }
