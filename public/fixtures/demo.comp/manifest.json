@@ -1,0 +1,272 @@
+{
+  "format": "com.compositor.project",
+  "version": 11,
+  "colorSpace": "sRGB",
+  "documentID": "6C2BC422-B0A1-4A06-8937-BFFEEDD65784",
+  "width": 1200,
+  "height": 800,
+  "resolution": 72,
+  "activeLayerID": "030551AC-DD96-45FC-8956-DEE4D69E6F64",
+  "layers": [
+    {
+      "isVisible": true,
+      "isGroup": false,
+      "opacity": 1,
+      "blendMode": "Normal",
+      "id": "D20DD3B7-45CB-433E-8762-D30C85EA8D05",
+      "name": "Sky",
+      "transform": {
+        "origin": [
+          0,
+          0
+        ],
+        "size": [
+          1200,
+          800
+        ],
+        "rotation": 0,
+        "flipX": false,
+        "flipY": false,
+        "sampling": "High quality"
+      },
+      "imageFile": "D20DD3B7-45CB-433E-8762-D30C85EA8D05.png"
+    },
+    {
+      "isVisible": true,
+      "isGroup": false,
+      "opacity": 1,
+      "blendMode": "Screen",
+      "id": "2580CC88-4A0C-408C-BBBF-6744A1C770E6",
+      "name": "Sun",
+      "transform": {
+        "origin": [
+          760,
+          110
+        ],
+        "size": [
+          300,
+          300
+        ],
+        "rotation": 0,
+        "flipX": false,
+        "flipY": false,
+        "sampling": "High quality"
+      },
+      "imageFile": "2580CC88-4A0C-408C-BBBF-6744A1C770E6.png"
+    },
+    {
+      "isVisible": true,
+      "isGroup": false,
+      "opacity": 0.85,
+      "blendMode": "Multiply",
+      "id": "9763E1FB-5272-4BC0-952C-668B45D74B2B",
+      "name": "Hills",
+      "transform": {
+        "origin": [
+          0,
+          420
+        ],
+        "size": [
+          1200,
+          380
+        ],
+        "rotation": 0,
+        "flipX": false,
+        "flipY": false,
+        "sampling": "High quality"
+      },
+      "imageFile": "9763E1FB-5272-4BC0-952C-668B45D74B2B.png",
+      "maskFile": "9763E1FB-5272-4BC0-952C-668B45D74B2B.mask.png",
+      "maskEnabled": true
+    },
+    {
+      "isVisible": true,
+      "isGroup": true,
+      "opacity": 0.7,
+      "blendMode": "Normal",
+      "id": "614E6896-E704-483E-B373-DFF912EABD70",
+      "name": "Overlays",
+      "transform": {
+        "origin": [
+          0,
+          0
+        ],
+        "size": [
+          1200,
+          800
+        ],
+        "rotation": 0,
+        "flipX": false,
+        "flipY": false,
+        "sampling": "High quality"
+      }
+    },
+    {
+      "isVisible": true,
+      "isGroup": false,
+      "opacity": 1,
+      "blendMode": "Normal",
+      "id": "259F3077-7E43-4AA3-9984-873EF67894B5",
+      "name": "Stripe",
+      "parentID": "614E6896-E704-483E-B373-DFF912EABD70",
+      "transform": {
+        "origin": [
+          200,
+          250
+        ],
+        "size": [
+          600,
+          90
+        ],
+        "rotation": 15,
+        "flipX": false,
+        "flipY": false,
+        "sampling": "High quality"
+      },
+      "imageFile": "259F3077-7E43-4AA3-9984-873EF67894B5.png"
+    },
+    {
+      "isVisible": true,
+      "isGroup": false,
+      "opacity": 1,
+      "blendMode": "Overlay",
+      "id": "20F6CDE3-117D-43B6-8F9F-B7A5574665CB",
+      "name": "Tint",
+      "parentID": "614E6896-E704-483E-B373-DFF912EABD70",
+      "transform": {
+        "origin": [
+          0,
+          0
+        ],
+        "size": [
+          1200,
+          800
+        ],
+        "rotation": 0,
+        "flipX": false,
+        "flipY": false,
+        "sampling": "High quality"
+      },
+      "imageFile": "20F6CDE3-117D-43B6-8F9F-B7A5574665CB.png"
+    },
+    {
+      "isVisible": true,
+      "isGroup": false,
+      "opacity": 1,
+      "blendMode": "Normal",
+      "id": "030551AC-DD96-45FC-8956-DEE4D69E6F64",
+      "name": "Warm Grade",
+      "transform": {
+        "origin": [
+          0,
+          0
+        ],
+        "size": [
+          1200,
+          800
+        ],
+        "rotation": 0,
+        "flipX": false,
+        "flipY": false,
+        "sampling": "High quality"
+      },
+      "adjustment": {
+        "kind": "Curves",
+        "hue": 0,
+        "saturation": 0,
+        "lightness": 0,
+        "colorize": false,
+        "levels": {
+          "channel": "RGB",
+          "ranges": [
+            {
+              "black": 0,
+              "gamma": 1,
+              "white": 255,
+              "outputBlack": 0,
+              "outputWhite": 255
+            },
+            {
+              "black": 0,
+              "gamma": 1,
+              "white": 255,
+              "outputBlack": 0,
+              "outputWhite": 255
+            },
+            {
+              "black": 0,
+              "gamma": 1,
+              "white": 255,
+              "outputBlack": 0,
+              "outputWhite": 255
+            },
+            {
+              "black": 0,
+              "gamma": 1,
+              "white": 255,
+              "outputBlack": 0,
+              "outputWhite": 255
+            }
+          ]
+        },
+        "curves": {
+          "channel": "RGB",
+          "channels": [
+            [
+              {
+                "x": 0,
+                "y": 0
+              },
+              {
+                "x": 255,
+                "y": 255
+              }
+            ],
+            [
+              {
+                "x": 0,
+                "y": 0
+              },
+              {
+                "x": 120,
+                "y": 147
+              },
+              {
+                "x": 255,
+                "y": 255
+              }
+            ],
+            [
+              {
+                "x": 0,
+                "y": 0
+              },
+              {
+                "x": 100,
+                "y": 114
+              },
+              {
+                "x": 255,
+                "y": 255
+              }
+            ],
+            [
+              {
+                "x": 0,
+                "y": 0
+              },
+              {
+                "x": 115,
+                "y": 97
+              },
+              {
+                "x": 255,
+                "y": 238
+              }
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}
