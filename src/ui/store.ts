@@ -62,6 +62,8 @@ export interface EditorState {
   marquee: 'rectangle' | 'ellipse'
   autoSelect: boolean
   showTransform: boolean
+  /** Corner handles keep proportions (Shift frees them for one drag). */
+  lockAspect: boolean
   busy: string | null
   error: string | null
   notice: string | null
@@ -73,11 +75,12 @@ let state: EditorState = {
   views: {},
   activeTabID: null,
   tool: 'move',
-  brush: { size: 60, hardness: 0.8, opacity: 1, erase: false },
+  brush: { size: 40, hardness: 1, opacity: 1, erase: false },
   colors: { fg: [0, 0, 0], bg: [1, 1, 1] },
   marquee: 'rectangle',
   autoSelect: false,
   showTransform: true,
+  lockAspect: true,
   busy: null,
   error: null,
   notice: null,
@@ -168,16 +171,18 @@ export function seal() {
 
 export function undo() {
   const tab = activeTab()
+  const name = tab?.history.undoName
   if (!tab?.history.undo()) return
   updateTab(tab.id, fromHistory)
-  notify(`已撤销`)
+  notify(`已撤销：${name}`)
 }
 
 export function redo() {
   const tab = activeTab()
+  const name = tab?.history.redoName
   if (!tab?.history.redo()) return
   updateTab(tab.id, fromHistory)
-  notify(`已重做`)
+  notify(`已重做：${name}`)
 }
 
 // GPU textures for pixels nothing can show any more — not the current state, not any undo step — are let go.
@@ -304,6 +309,7 @@ export const setColors = (colors: EditorState['colors']) => set({ colors })
 export const setMarquee = (marquee: EditorState['marquee']) => set({ marquee })
 export const setAutoSelect = (autoSelect: boolean) => set({ autoSelect })
 export const setShowTransform = (showTransform: boolean) => set({ showTransform })
+export const setLockAspect = (lockAspect: boolean) => set({ lockAspect })
 export const setBusy = (busy: string | null) => set({ busy })
 export const setError = (error: string | null) => set({ error })
 export const setLayersWidth = (width: number) => set({ layersWidth: Math.min(352, Math.max(202, width)) })

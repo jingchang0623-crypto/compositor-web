@@ -8,6 +8,7 @@ import { deselect, inverseSelection, selectAllCanvas } from './selectionActions'
 import { activateTab, activeLayer, activeTab, activeView, closeTab, redo, setTool, undo, useEditor } from './store'
 import { IDLE_HINT, TOOLS } from './tools'
 import { formatZoom } from './viewport'
+import { BrushOptions, MarqueeOptions, MoveOptions } from './ToolOptions'
 import { Welcome } from './Welcome'
 
 // MARK: Title bar
@@ -179,13 +180,10 @@ export function OptionsBar() {
           <button onClick={actualPixels}>100%</button>
         </>
       )}
-      {tool === 'move' && (
-        <>
-          <label className="check"><input type="checkbox" disabled defaultChecked /> 自动选择</label>
-          <label className="check"><input type="checkbox" disabled defaultChecked /> 显示变换控件</label>
-        </>
-      )}
-      {def && !def.ready && <span className="soon">G2 实现 · 当前可用：抓手 H、缩放 Z、空格平移</span>}
+      {tool === 'move' && <MoveOptions />}
+      {tool === 'brush' && <BrushOptions />}
+      {tool === 'marquee' && <MarqueeOptions />}
+      {def && !def.ready && <span className="soon">后续版本 · 现在可用：移动 V、选框 M、画笔 B / 橡皮 E、抓手 H、缩放 Z</span>}
     </div>
   )
 }

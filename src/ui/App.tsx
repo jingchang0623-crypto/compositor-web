@@ -7,6 +7,7 @@ import { OptionsBar, StatusBar, TitleBar, ToolRail } from './Chrome'
 import { importImages, openDrop, openURL } from './commands'
 import { handleKey } from './keys'
 import { LayersPanel } from './LayersPanel'
+import { Overlay } from './Overlay'
 import { setError, useEditor } from './store'
 import { Welcome } from './Welcome'
 
@@ -74,6 +75,7 @@ export function App() {
         <ToolRail />
         <main className="stage">
           <CanvasView />
+          <Overlay />
           {!hasTabs && !busy && <div className="welcome-wrap"><Welcome /></div>}
           {busy && <div className="busy">{busy}</div>}
           {error && (

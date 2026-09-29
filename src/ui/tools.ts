@@ -21,12 +21,12 @@ export interface Tool {
 }
 
 export const TOOLS: Tool[] = [
-  { id: 'move', name: '移动 / 变换', key: 'V', icon: Move, hint: '拖动移动 · 手柄缩放 · 圆点旋转 · 1–0 设不透明度 · 空格平移' },
-  { id: 'marquee', name: '选框', key: 'M', icon: SquareDashed, hint: '拖出矩形 · Shift 加选 · Option 减选 · ⌘D 取消选择' },
+  { id: 'move', name: '移动 / 变换', key: 'V', icon: Move, hint: '拖动移动 · 手柄缩放（Shift 自由比例，Option 从中心）· 圆点旋转（Shift 15°）· 方向键微移 · Ctrl 不吸附 · 1–0 不透明度', ready: true },
+  { id: 'marquee', name: '选框', key: 'M', icon: SquareDashed, hint: '拖出选区 · Shift 加选 · Option 减选 · 选区内拖动移动 · ⌫ 清除 · ⌥⌫ 填充前景色 · ⌘D 取消选择', ready: true },
   { id: 'lasso', name: '套索', key: 'L', icon: Lasso, hint: '拖动选区 · Shift 加选 · Option 减选 · ⌘D 取消选择' },
   { id: 'wand', name: '魔棒 · Tab 切换对象选择', key: 'W', icon: WandSparkles, hint: '点击选择相近颜色 · Tab 切换对象选择 · Shift 加选 · Option 减选' },
   { id: 'crop', name: '裁剪', key: 'C', icon: Crop, hint: '拖动裁剪 · Enter 应用 · Esc 取消 · 空格平移' },
-  { id: 'brush', name: '画笔 · E 橡皮', key: 'B', icon: Paintbrush, hint: '拖动绘画 · [ ] 大小 · Shift-[ ] 硬度 · 1–0 不透明度 · 空格平移' },
+  { id: 'brush', name: '画笔 · E 橡皮', key: 'B', icon: Paintbrush, hint: '拖动绘画 · Shift 点击画直线 · [ ] 大小 · Shift-[ ] 硬度 · 1–0 不透明度 · X 交换颜色 · 空格平移', ready: true },
   { id: 'spotHealing', name: '污点修复画笔', key: 'J', icon: Bandage, hint: '在瑕疵上涂抹修复 · [ ] 大小 · 空格平移' },
   { id: 'cloneStamp', name: '仿制图章 · Option 点击取样', key: 'S', icon: Stamp, hint: 'Option 点击设置取样点 · 拖动仿制 · [ ] 大小 · 空格平移' },
   { id: 'blur', name: '涂抹', key: 'R', icon: Droplet, hint: '拖动柔化 · [ ] 大小 · 1–0 强度 · 空格平移' },

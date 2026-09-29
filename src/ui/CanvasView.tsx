@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { CanvasRenderer } from '../engine/canvasRenderer'
 import { Compositor, type View } from '../engine/compositor'
 import { compareWithPreview } from '../io/compare'
-import { activeTab, activeView, onRelease, setComparison, setError, setView, subscribe, useEditor, type Tab } from './store'
+import { toolKeys } from './keys'
+import { activeTab, activeView, getState, onRelease, seal, setComparison, setError, setView, subscribe, useEditor, type Tab } from './store'
+import { moveTool, nudge } from './tools/move'
+import type { ToolController, ToolPointer } from './tools/pointer'
+import type { ToolID } from './tools'
 import { fitView, keyboardZoomTarget, zoomTo } from './viewport'
 
 /** The one GPU context, shared by the canvas, the benchmark and preview comparisons. */
@@ -172,13 +176,42 @@ export function CanvasView() {
   // MARK: Pointer
 
   const gesture = useRef<{ kind: 'pan' | 'zoom'; x: number; y: number; start: View; moved: boolean; alt: boolean } | null>(null)
+  const controllers = useRef<Partial<Record<ToolID, ToolController>>>({})
+  if (!controllers.current.move) controllers.current = makeControllers()
+  const pressed = useRef<ToolController | null>(null)
+  const [toolCursor, setToolCursor] = useState('default')
   const panning = spaceHeld || tool === 'hand'
   const zooming = !spaceHeld && tool === 'zoom'
-  const cursor = panning ? (dragging ? 'grabbing' : 'grab') : zooming ? (optionHeld ? 'zoom-out' : 'zoom-in') : 'default'
+  const cursor = panning ? (dragging ? 'grabbing' : 'grab') : zooming ? (optionHeld ? 'zoom-out' : 'zoom-in') : toolCursor
+
+  // Arrow keys nudge with the Move tool; a run of presses is one undo step, ended when the key comes up.
+  useEffect(() => {
+    toolKeys.handle = (e) => {
+      const arrows: Record<string, [number, number]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }
+      const dir = arrows[e.key]
+      if (!dir) return false
+      const step = e.shiftKey ? 10 : 1
+      if (getState().tool === 'move') { nudge(dir[0] * step, dir[1] * step); return true }
+      return controllers.current[getState().tool]?.key?.(e, dir[0] * step, dir[1] * step) ?? false
+    }
+    const up = (e: KeyboardEvent) => { if (e.key.startsWith('Arrow')) seal() }
+    window.addEventListener('keyup', up)
+    return () => window.removeEventListener('keyup', up)
+  }, [])
 
   const point = (e: React.PointerEvent) => {
     const rect = e.currentTarget.getBoundingClientRect()
     return { x: (e.clientX - rect.left) * devicePixelRatio, y: (e.clientY - rect.top) * devicePixelRatio }
+  }
+
+  const toolPointer = (e: React.PointerEvent | PointerEvent, rect: DOMRect): ToolPointer | null => {
+    const v = activeView()?.view
+    if (!v) return null
+    const sx = e.clientX - rect.left, sy = e.clientY - rect.top
+    return {
+      x: (sx * devicePixelRatio - v.x) / v.scale, y: (sy * devicePixelRatio - v.y) / v.scale, sx, sy,
+      shift: e.shiftKey, alt: e.altKey, meta: e.metaKey, ctrl: e.ctrlKey, pressure: e.pressure || 0.5,
+    }
   }
 
   return (
@@ -188,29 +221,67 @@ export function CanvasView() {
       style={{ cursor }}
       onPointerDown={(e) => {
         const v = activeView()?.view
-        if (!v || e.button !== 0 || !(panning || zooming)) return
-        e.currentTarget.setPointerCapture(e.pointerId)
-        const p = point(e)
-        gesture.current = { kind: panning ? 'pan' : 'zoom', ...p, start: v, moved: false, alt: e.altKey }
-        setDragging(true)
+        if (!v || e.button !== 0) return
+        if (panning || zooming) {
+          e.currentTarget.setPointerCapture(e.pointerId)
+          const p = point(e)
+          gesture.current = { kind: panning ? 'pan' : 'zoom', ...p, start: v, moved: false, alt: e.altKey }
+          setDragging(true)
+          return
+        }
+        const controller = controllers.current[tool]
+        const p = toolPointer(e, e.currentTarget.getBoundingClientRect())
+        if (controller && p && controller.down(p)) {
+          e.currentTarget.setPointerCapture(e.pointerId)
+          pressed.current = controller
+        }
       }}
       onPointerMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect()
         const g = gesture.current
-        if (!g) return
-        const p = point(e)
-        const dx = p.x - g.x, dy = p.y - g.y
-        if (Math.hypot(dx, dy) > 3 * devicePixelRatio) g.moved = true
-        if (g.kind === 'pan') setView({ ...g.start, x: g.start.x + dx, y: g.start.y + dy })
-        // Dragging right zooms in and left zooms out, smoothly, about where the drag began.
-        else if (g.moved) setView(zoomTo(g.start, g.start.scale * Math.exp(dx / (devicePixelRatio * 150)), g.x, g.y))
+        if (g) {
+          const p = point(e)
+          const dx = p.x - g.x, dy = p.y - g.y
+          if (Math.hypot(dx, dy) > 3 * devicePixelRatio) g.moved = true
+          if (g.kind === 'pan') setView({ ...g.start, x: g.start.x + dx, y: g.start.y + dy })
+          // Dragging right zooms in and left zooms out, smoothly, about where the drag began.
+          else if (g.moved) setView(zoomTo(g.start, g.start.scale * Math.exp(dx / (devicePixelRatio * 150)), g.x, g.y))
+          return
+        }
+        if (pressed.current) {
+          // Every sample the browser coalesced into this event, so fast strokes stay smooth.
+          const events = e.nativeEvent.getCoalescedEvents?.() ?? [e.nativeEvent]
+          for (const ev of events.length ? events : [e.nativeEvent]) {
+            const p = toolPointer(ev, rect)
+            if (p) pressed.current.move(p)
+          }
+          return
+        }
+        const controller = controllers.current[tool]
+        const p = toolPointer(e, rect)
+        if (controller && p && !panning && !zooming) {
+          const next = controller.hover?.(p) ?? 'default'
+          if (next !== toolCursor) setToolCursor(next)
+        }
       }}
-      onPointerUp={() => {
+      onPointerUp={(e) => {
+        if (pressed.current) {
+          const p = toolPointer(e, e.currentTarget.getBoundingClientRect())
+          if (p) pressed.current.up(p)
+          pressed.current = null
+          return
+        }
         const g = gesture.current
         gesture.current = null
         setDragging(false)
         const v = activeView()?.view
         if (g?.kind === 'zoom' && !g.moved && v) setView(zoomTo(v, keyboardZoomTarget(v.scale, g.alt ? -1 : 1), g.x, g.y))
       }}
+      onPointerLeave={() => controllers.current[tool]?.leave?.()}
     />
   )
+}
+
+function makeControllers(): Partial<Record<ToolID, ToolController>> {
+  return { move: moveTool() }
 }
