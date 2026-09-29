@@ -3,8 +3,8 @@
 
 import { addBlankLayer, duplicateLayer, groupActive, setOpacity, ungroupActive } from './actions'
 import { actualPixels, exportImage, fit, pickFolder, pickImages, save, zoomStep } from './commands'
-import { deselect, inverseSelection, selectAllCanvas } from './selectionActions'
-import { activeLayer, getState, redo, seal, setBrush, setColors, setTool, undo } from './store'
+import { deselect, inverseSelection, selectAllCanvas, throughSelection } from './selectionActions'
+import { activeLayer, activeTab, getState, redo, seal, setBrush, setColors, setTool, undo } from './store'
 import { toolByKey } from './tools'
 
 /** Keys a tool handles itself (arrows to nudge, Delete to clear), registered by the canvas. */
@@ -14,7 +14,8 @@ const typing = (e: KeyboardEvent) =>
   e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement
 
 export function handleKey(e: KeyboardEvent) {
-  if (typing(e)) return
+  // Already handled where it happened (the layers panel deletes its own row on Backspace).
+  if (typing(e) || e.defaultPrevented) return
   const k = e.key.toLowerCase()
   const cmd = e.metaKey || e.ctrlKey
   if (cmd) {
@@ -24,7 +25,7 @@ export function handleKey(e: KeyboardEvent) {
       s: () => void save(), '⇧s': () => void save(true), '⇧⌥s': () => void exportImage('image/jpeg'),
       o: () => void pickFolder(), '⇧o': pickImages,
       j: () => duplicateLayer(), g: groupActive, '⇧g': ungroupActive, '⇧⌥n': addBlankLayer,
-      a: selectAllCanvas, d: deselect, '⇧i': inverseSelection,
+      a: selectAllCanvas, d: deselect, '⇧i': inverseSelection, backspace: () => throughSelection('background'),
       '0': fit, '1': actualPixels, '=': () => zoomStep(1), '+': () => zoomStep(1), '-': () => zoomStep(-1),
     }
     // Option changes what e.key reports on a Mac; match the physical key for the letter shortcuts.
@@ -39,6 +40,11 @@ export function handleKey(e: KeyboardEvent) {
   if (toolKeys.handle?.(e)) {
     e.preventDefault()
     return
+  }
+  // Delete clears the selection's pixels; Option-Delete fills it with the foreground color (⌘⌫, above, the background).
+  if ((k === 'backspace' || k === 'delete') && activeTab()?.selection) {
+    e.preventDefault()
+    return throughSelection(e.altKey ? 'foreground' : 'clear')
   }
   if (e.altKey || e.repeat) return
   const s = getState()

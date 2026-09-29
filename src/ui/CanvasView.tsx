@@ -4,6 +4,8 @@ import { Compositor, type View } from '../engine/compositor'
 import { compareWithPreview } from '../io/compare'
 import { toolKeys } from './keys'
 import { activeTab, activeView, getState, onRelease, seal, setComparison, setError, setView, subscribe, useEditor, type Tab } from './store'
+import { brushTool } from './tools/brush'
+import { marqueeTool } from './tools/marquee'
 import { moveTool, nudge } from './tools/move'
 import type { ToolController, ToolPointer } from './tools/pointer'
 import type { ToolID } from './tools'
@@ -183,16 +185,24 @@ export function CanvasView() {
   const panning = spaceHeld || tool === 'hand'
   const zooming = !spaceHeld && tool === 'zoom'
   const cursor = panning ? (dragging ? 'grabbing' : 'grab') : zooming ? (optionHeld ? 'zoom-out' : 'zoom-in') : toolCursor
+  // Handlers read the tool when the event comes, not from the last render, which a key press may have outrun.
+  const spaceRef = useRef(false)
+  spaceRef.current = spaceHeld
+  const now = () => {
+    const t = getState().tool
+    return { t, panning: spaceRef.current || t === 'hand', zooming: !spaceRef.current && t === 'zoom' }
+  }
 
   // Arrow keys nudge with the Move tool; a run of presses is one undo step, ended when the key comes up.
   useEffect(() => {
     toolKeys.handle = (e) => {
       const arrows: Record<string, [number, number]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }
       const dir = arrows[e.key]
-      if (!dir) return false
+      const controller = controllers.current[getState().tool]
+      if (!dir) return controller?.key?.(e, 0, 0) ?? false
       const step = e.shiftKey ? 10 : 1
       if (getState().tool === 'move') { nudge(dir[0] * step, dir[1] * step); return true }
-      return controllers.current[getState().tool]?.key?.(e, dir[0] * step, dir[1] * step) ?? false
+      return controller?.key?.(e, dir[0] * step, dir[1] * step) ?? false
     }
     const up = (e: KeyboardEvent) => { if (e.key.startsWith('Arrow')) seal() }
     window.addEventListener('keyup', up)
@@ -222,6 +232,7 @@ export function CanvasView() {
       onPointerDown={(e) => {
         const v = activeView()?.view
         if (!v || e.button !== 0) return
+        const { t, panning, zooming } = now()
         if (panning || zooming) {
           e.currentTarget.setPointerCapture(e.pointerId)
           const p = point(e)
@@ -229,7 +240,7 @@ export function CanvasView() {
           setDragging(true)
           return
         }
-        const controller = controllers.current[tool]
+        const controller = controllers.current[t]
         const p = toolPointer(e, e.currentTarget.getBoundingClientRect())
         if (controller && p && controller.down(p)) {
           e.currentTarget.setPointerCapture(e.pointerId)
@@ -257,9 +268,10 @@ export function CanvasView() {
           }
           return
         }
-        const controller = controllers.current[tool]
+        const state = now()
+        const controller = controllers.current[state.t]
         const p = toolPointer(e, rect)
-        if (controller && p && !panning && !zooming) {
+        if (controller && p && !state.panning && !state.zooming) {
           const next = controller.hover?.(p) ?? 'default'
           if (next !== toolCursor) setToolCursor(next)
         }
@@ -277,11 +289,11 @@ export function CanvasView() {
         const v = activeView()?.view
         if (g?.kind === 'zoom' && !g.moved && v) setView(zoomTo(v, keyboardZoomTarget(v.scale, g.alt ? -1 : 1), g.x, g.y))
       }}
-      onPointerLeave={() => controllers.current[tool]?.leave?.()}
+      onPointerLeave={() => controllers.current[getState().tool]?.leave?.()}
     />
   )
 }
 
 function makeControllers(): Partial<Record<ToolID, ToolController>> {
-  return { move: moveTool() }
+  return { move: moveTool(), brush: brushTool(), marquee: marqueeTool() }
 }

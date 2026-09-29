@@ -9,5 +9,7 @@ import * as store from './ui/store'
 import * as move from './ui/tools/move'
 import * as save from './io/save'
 import * as comp from './io/comp'
+import * as paintTarget from './ui/paintTarget'
+import * as synthetic from './bench/synthetic'
 
-Object.assign(window, { __dev: { actions, canvas, commands, overlay, store, move, save, comp } })
+Object.assign(window, { __dev: { actions, canvas, commands, overlay, store, move, save, comp, paintTarget, synthetic } })

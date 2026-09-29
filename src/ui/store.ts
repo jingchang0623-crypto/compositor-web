@@ -34,6 +34,8 @@ export interface Tab {
   folder?: FileSystemDirectoryHandle
   /** Bumped by every change to the document, for autosave and the title's edited dot. */
   revision: number
+  /** Where this project's unsaved work is kept in the browser. */
+  autosaveKey: string
 }
 
 /** Kept apart from the tab, so panning re-renders only what shows the zoom, not the layer list. */
@@ -218,7 +220,10 @@ export function openProject(project: LoadedProject) {
     selection: null,
     folder: project.folder,
     revision: 0,
+    autosaveKey: '',
   }
+  tab.autosaveKey = project.recovered ?? tab.id
+  if (project.recovered) tab.history.forgetSaved()
   set({ tabs: [...state.tabs, tab], activeTabID: tab.id, error: null })
   return tab
 }
@@ -231,10 +236,17 @@ export function newCanvas(width: number, height: number, name?: string) {
   })
 }
 
+const closeHooks = new Set<(tab: Tab) => void>()
+export function onClose(hook: (tab: Tab) => void) {
+  closeHooks.add(hook)
+}
+
 export function closeTab(id: string) {
   const index = state.tabs.findIndex((t) => t.id === id)
   if (index < 0) return
   const closing = state.tabs[index]
+  if (closing.history.isModified && !confirm(`“${closing.name}”有未保存的改动。\n关闭后可以在欢迎页的“未保存的工作”里恢复。确定关闭？`)) return
+  for (const hook of closeHooks) hook(closing)
   const tabs = state.tabs.filter((t) => t.id !== id)
   const next = state.activeTabID === id ? (tabs[index] ?? tabs[index - 1] ?? null)?.id ?? null : state.activeTabID
   const views = { ...state.views }
@@ -286,6 +298,11 @@ export function toggleCollapsed(id: string) {
 /** Swaps the whole document of the active tab without a history step (the benchmark drives edits this way). */
 export function replaceDoc(doc: Manifest) {
   updateActive((t) => ({ ...t, doc }))
+}
+
+/** Drops a preview: the tab shows its history's current state again (a cancelled stroke). */
+export function resetPreview() {
+  updateActive((t) => ({ ...t, doc: t.history.current.doc, assets: t.history.current.assets, store: assetStore(t.history.current.assets) }))
 }
 
 /** Shows pixels still being painted, without a history step: the stroke commits once it ends. */

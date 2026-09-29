@@ -89,6 +89,15 @@ function MenuBar() {
   const tab = useEditor(activeTab)
   const layer = useEditor(activeLayer)
   const [open, setOpen] = useState<string | null>(null)
+  const [showKeys, setShowKeys] = useState(false)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === '?' && !(e.target instanceof HTMLInputElement)) setShowKeys((v) => !v)
+      if (e.key === 'Escape') setShowKeys(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
   const doc = !!tab
   const menus: [string, MenuEntry[]][] = [
     ['文件', [
@@ -127,8 +136,13 @@ function MenuBar() {
       { label: '取消选择', keys: '⌘D', run: deselect, disabled: !tab?.selection },
       { label: '反选', keys: '⇧⌘I', run: inverseSelection, disabled: !tab?.selection },
     ]],
+    ['帮助', [
+      { label: '快捷键', keys: '?', run: () => setShowKeys(true) },
+    ]],
   ]
   return (
+    <>
+    {showKeys && <ShortcutSheet onClose={() => setShowKeys(false)} />}
     <nav className="menubar" aria-label="菜单">
       {menus.map(([name, items]) => (
         <div key={name} className="popover-anchor" onPointerEnter={() => open && setOpen(name)}>
@@ -150,6 +164,36 @@ function MenuBar() {
         </div>
       ))}
     </nav>
+    </>
+  )
+}
+
+const SHORTCUTS: [string, [string, string][]][] = [
+  ['工具', [['V', '移动 / 变换'], ['M', '选框'], ['B', '画笔'], ['E', '橡皮'], ['H', '抓手'], ['Z', '缩放'], ['A', '不选工具'], ['空格（按住）', '临时平移']]],
+  ['文件', [['⌘O', '打开 .comp 文件夹'], ['⇧⌘O', '打开图片'], ['⌘V', '粘贴图片为新图层'], ['⌘S', '保存'], ['⇧⌘S', '另存为'], ['⇧⌥⌘S', '导出 JPEG']]],
+  ['编辑与图层', [['⌘Z / ⇧⌘Z', '撤销 / 重做'], ['⌥⇧⌘N', '新建图层'], ['⌘J', '复制图层'], ['⌘G / ⇧⌘G', '编组 / 取消编组'], ['⌫（图层面板）', '删除图层'], ['Enter（图层面板）', '重命名'], ['↑ ↓（图层面板）', '切换图层']]],
+  ['选区', [['⌘A / ⌘D', '全选 / 取消选择'], ['⇧⌘I', '反选'], ['⌫', '清除选区内像素'], ['⌥⌫ / ⌘⌫', '填充前景色 / 背景色'], ['Shift / Option 拖动', '加选 / 减选']]],
+  ['画笔', [['[ ]', '大小 ×1.2'], ['Shift + [ ]', '硬度 ±25%'], ['1 … 0', '不透明度 10% … 100%'], ['X / D', '交换 / 默认颜色'], ['Shift 点击', '接着上一笔画直线'], ['Esc', '取消这一笔']]],
+  ['视图', [['⌘0 / ⌘1', '适配窗口 / 100%'], ['⌘+ / ⌘−', '放大 / 缩小'], ['⌘ / ⌥ + 滚轮', '缩放'], ['方向键', '微移 1px（Shift 10px）']]],
+]
+
+/** Every shortcut on one sheet; Chrome keeps ⌘N, ⌘T and ⌘W for itself, so new layers are ⌥⇧⌘N. */
+function ShortcutSheet({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="sheet-backdrop" onPointerDown={onClose}>
+      <section className="sheet" role="dialog" aria-label="快捷键" onPointerDown={(e) => e.stopPropagation()}>
+        <header><strong>快捷键</strong><button className="icon" onClick={onClose} aria-label="关闭"><X size={14} /></button></header>
+        <div className="shortcut-grid">
+          {SHORTCUTS.map(([group, rows]) => (
+            <div key={group}>
+              <h3>{group}</h3>
+              <dl>{rows.map(([k, v]) => <div key={k}><dt><kbd>{k}</kbd></dt><dd>{v}</dd></div>)}</dl>
+            </div>
+          ))}
+        </div>
+        <p className="note">浏览器保留了 ⌘N、⌘T、⌘W，所以新建图层用 ⌥⇧⌘N。</p>
+      </section>
+    </div>
   )
 }
 

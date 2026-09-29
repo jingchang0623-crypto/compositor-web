@@ -6,7 +6,8 @@ import {
   moveLayer, nextName, pixelLayer, removeLayers, ungroup,
 } from '../model/document'
 import { fullCanvasTransform, type AdjustmentKind, type BlendMode, type LayerRecord, type Manifest } from '../model/manifest'
-import { activeLayer, activeTab, edit, notify, selectLayer, setTarget, updateLayer } from './store'
+import { commitStroke, paintEngine, paintOptions, resolveTarget } from './paintTarget'
+import { activeLayer, activeTab, edit, notify, selectLayer, setSelection, setTarget, updateLayer } from './store'
 
 /** Adds a record where a new layer goes (above the active one, or on top of an active folder) and selects it. */
 function addRecord(name: string, make: (doc: Manifest) => LayerRecord) {
@@ -106,8 +107,10 @@ export function setBlendMode(id: string, blendMode: BlendMode) {
  * (upstream LayerMask.swift). Painting it makes it full size. The mask becomes what painting changes.
  */
 export function addMask(id = activeLayer()?.id) {
-  const layer = activeTab()?.doc.layers.find((l) => l.id === id)
-  if (!layer || layer.maskFile) return
+  const tab = activeTab()
+  const layer = tab?.doc.layers.find((l) => l.id === id)
+  if (!tab || !layer || layer.maskFile) return
+  if (tab.selection) return maskFromSelection(layer.id)
   const file = `${layer.id}.mask.png`
   edit('添加蒙版', (s) => ({
     doc: { ...s.doc, layers: s.doc.layers.map((l) => (l.id === layer.id ? { ...l, maskFile: file, maskEnabled: true } : l)) },
@@ -134,4 +137,21 @@ export function deleteMask(id = activeLayer()?.id) {
 export function toggleMaskEnabled(id: string) {
   const layer = activeTab()?.doc.layers.find((l) => l.id === id)
   if (layer?.maskFile) updateLayer(id, { maskEnabled: layer.maskEnabled === false }, layer.maskEnabled === false ? '启用蒙版' : '停用蒙版')
+}
+
+/**
+ * With a selection, a new mask shows only what's selected: black everywhere, white through the selection, at the
+ * layer's own pixel size; then the selection goes, as in the desktop app (LayerMask.swift).
+ */
+function maskFromSelection(id: string) {
+  selectLayer(id, 'mask')
+  const r = resolveTarget()
+  const engine = paintEngine()
+  if (!r || !engine) return
+  r.target.fill = 0
+  r.target.source = null
+  const stroke = engine.begin(r.target, paintOptions(r, false, 1, [1, 1, 1]))
+  stroke.fillAll()
+  commitStroke('从选区添加蒙版', r, stroke)
+  setSelection(null)
 }

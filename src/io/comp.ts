@@ -16,6 +16,8 @@ export interface LoadedProject {
   files?: PackageFiles
   /** Where the package came from, when it can be written back in place (Chromium's File System Access). */
   folder?: FileSystemDirectoryHandle
+  /** Reopened from the browser's autosave: its key there, and it's unsaved work. */
+  recovered?: string
   /** `QuickLook/Preview.jpg`, which the desktop app writes on every save: a reference for checking our rendering. */
   preview?: ImageBitmap
   warnings: string[]

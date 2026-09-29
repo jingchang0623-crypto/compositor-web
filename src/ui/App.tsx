@@ -5,6 +5,7 @@ import { runBench, type BenchReport } from '../bench/runBench'
 import { CanvasView } from './CanvasView'
 import { OptionsBar, StatusBar, TitleBar, ToolRail } from './Chrome'
 import { importImages, openDrop, openURL } from './commands'
+import { watchAutosave } from './autosaveWatcher'
 import { handleKey } from './keys'
 import { AdjustmentPanel } from './AdjustmentPanel'
 import { LayersPanel } from './LayersPanel'
@@ -36,6 +37,7 @@ export function App() {
   useEffect(() => {
     if (started.current) return
     started.current = true
+    watchAutosave()
     const url = params.get('open')
     if (url) openURL(url)
     if (params.get('bench')) void bench$()

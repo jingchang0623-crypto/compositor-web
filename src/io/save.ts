@@ -88,7 +88,13 @@ export function manifestForSave(doc: Manifest, activeLayerID?: string): Manifest
   }
 }
 
-export async function packageProject(input: SaveInput, compositor?: Compositor): Promise<PackageOutput> {
+/** Every image file the document refers to: [file name, is a mask]. */
+export function imageFiles(doc: Manifest): [string, boolean][] {
+  return doc.layers.flatMap((l) => [[l.imageFile, false], [l.maskFile, true]] as const).filter((f): f is [string, boolean] => !!f[0])
+}
+
+/** `skip` leaves out images the caller already has (autosave writes only what changed). */
+export async function packageProject(input: SaveInput, compositor?: Compositor, skip?: (file: string, source: PixelSource) => boolean): Promise<PackageOutput> {
   const out: PackageOutput = new Map()
   const jobs: Promise<void>[] = []
   for (const layer of input.doc.layers) {
@@ -96,6 +102,7 @@ export async function packageProject(input: SaveInput, compositor?: Compositor):
       if (!file) continue
       const source = input.assets.get(file)
       if (!source) throw new Error(`${layer.name}: images/${file} has no pixels.`)
+      if (skip?.(file, source)) continue
       const unchanged = input.original?.assets.get(file) === source ? input.original?.files?.get(`images/${file}`) : undefined
       jobs.push((async () => {
         out.set(`images/${file}`, unchanged ? new Uint8Array(await unchanged.arrayBuffer()) : await png(source, mask))

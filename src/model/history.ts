@@ -45,6 +45,8 @@ export class History {
   get depth() { return this.past.length }
   get isModified() { return this.current !== this.savedState }
   markSaved(state = this.current) { this.savedState = state }
+  /** Nothing on disk matches this document (work recovered from an autosave). */
+  forgetSaved() { this.savedState = { doc: this.current.doc, assets: new Map() } }
 
   /** Records `next` as one step, or folds it into the open step with the same `key`. */
   commit(name: string, next: DocState, key?: string) {
