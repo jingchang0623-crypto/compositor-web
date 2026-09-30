@@ -21,7 +21,7 @@ export function TitleBar({ onBench }: { onBench: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false)
   return (
     <header className="titlebar">
-      <span className="brand">Compositor</span>
+      <span className="brand">ArtPS</span>
       <MenuBar />
       <div className="popover-anchor">
         <button className="icon" title="新建画布或打开项目" onClick={() => setNewOpen((o) => !o)}><Plus size={16} /></button>
@@ -66,7 +66,7 @@ export function TitleBar({ onBench }: { onBench: () => void }) {
               <div className="menu">
                 <button onClick={() => { setMenuOpen(false); onBench() }}>运行性能基准（G0.2 / G0.3）</button>
                 <a href="?test=blend">渲染自检（G0.1）</a>
-                <a href="https://github.com/robbietilton/Compositor" target="_blank" rel="noreferrer">桌面版 Compositor ↗</a>
+                <a href="https://github.com/robbietilton/Compositor" target="_blank" rel="noreferrer">上游项目：桌面版 Compositor ↗</a>
               </div>
             </Popover>
           )}

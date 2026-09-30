@@ -208,7 +208,7 @@ export async function writePackage(folder: FileSystemDirectoryHandle, files: Pac
 /** Asks for a folder to save into, and makes `<name>.comp` inside it. */
 export async function chooseNewPackage(name: string): Promise<FileSystemDirectoryHandle> {
   const parent = await (window as unknown as { showDirectoryPicker(o: object): Promise<FileSystemDirectoryHandle> })
-    .showDirectoryPicker({ mode: 'readwrite', id: 'compositor-save' })
+    .showDirectoryPicker({ mode: 'readwrite', id: 'artps-save' })
   return parent.getDirectoryHandle(`${name}.comp`, { create: true })
 }
 

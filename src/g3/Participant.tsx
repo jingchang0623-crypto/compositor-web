@@ -13,9 +13,9 @@ export function TaskCard() {
   return (
     <main className="g3">
       <header className="g3-head">
-        <span className="kicker">Compositor 网页版 · 用户测试{p && ` · ${p}`}</span>
+        <span className="kicker">ArtPS · 用户测试{p && ` · ${p}`}</span>
         <h1>换一片天空</h1>
-        <p>这是一个浏览器里的分层合成工具，还在早期阶段。请你用它完成下面几件事，大约 25 分钟。我们测的是工具，不是你：
+        <p>ArtPS 是一个浏览器里的分层合成工具，还在早期阶段。请你用它完成下面几件事，大约 25 分钟。我们测的是工具，不是你：
           卡住的地方正是我们最想知道的。</p>
       </header>
 
@@ -99,7 +99,7 @@ export function Survey() {
       return
     }
     const file: SurveyFile = {
-      kind: 'compositor-g3-survey', version: 1, participant, submittedAt: new Date().toISOString(), env: environment(), answers,
+      kind: 'artps-g3-survey', version: 1, participant, submittedAt: new Date().toISOString(), env: environment(), answers,
     }
     downloadJSON(file, `${participant}-survey.json`)
     setSubmitted(file)
@@ -126,7 +126,7 @@ export function Survey() {
   return (
     <main className="g3">
       <header className="g3-head">
-        <span className="kicker">Compositor 网页版 · 用户测试问卷</span>
+        <span className="kicker">ArtPS · 用户测试问卷</span>
         <h1>刚才用得怎么样？</h1>
         <p>大约 5 分钟。结果会附带你的浏览器、系统和屏幕尺寸，用来排查问题，不包含任何个人信息。</p>
       </header>

@@ -26,7 +26,7 @@ export function Welcome({ compact, onDone }: { compact?: boolean; onDone?: () =>
     <div className={`welcome${compact ? ' compact' : ''}`}>
       {!compact && (
         <div className="welcome-head">
-          <h1>Compositor</h1>
+          <h1>ArtPS</h1>
           <p>浏览器里的分层合成。图片只在你的电脑上处理，不会上传。</p>
         </div>
       )}
@@ -55,7 +55,7 @@ export function Welcome({ compact, onDone }: { compact?: boolean; onDone?: () =>
           <button onClick={done(pickImages)}><ImagePlus size={15} /> 图片</button>
           <button onClick={done(openSample)}><Image size={15} /> 示例项目</button>
         </div>
-        <p className="note">也可以把 .comp 文件夹、zip 或图片直接拖进窗口，或粘贴图片（⌘V）。桌面版保存的项目可以直接打开。</p>
+        <p className="note">也可以把 .comp 文件夹、zip 或图片直接拖进窗口，或粘贴图片（⌘V）。桌面版 Compositor 保存的 .comp 项目可以直接打开。</p>
       </section>
       {!compact && <Recovery />}
     </div>

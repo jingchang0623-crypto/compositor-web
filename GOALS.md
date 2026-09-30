@@ -1,9 +1,9 @@
-# Compositor Web — 目标与验收
+# ArtPS — 目标与验收
 
 > 北极星：在浏览器里完成「导入 → 分层合成 → 调色 → 导出」闭环，并与桌面版 `.comp` 互开。
 > 原则：先验证风险最大的假设；每个目标都有可测量的通过线；不达标不进入下一阶段。
 
-上游项目：[robbietilton/Compositor](https://github.com/robbietilton/Compositor)（MIT）。
+ArtPS 是开源项目 [robbietilton/Compositor](https://github.com/robbietilton/Compositor)（MIT）的 Web 版，与桌面版 Compositor 的 `.comp` 项目互通。
 Web 版数据模型 = `.comp` manifest v11（见上游 `docs/project-format.md`、`docs/writing-comp-files.md`）。
 
 ---
@@ -126,7 +126,7 @@ G0.4 已验证：按上游 `docs/writing-comp-files.md` 写出的 7 层夹具（
 
 | # | 关键结果 | 通过线 | 状态 |
 |---|---|---|---|
-| G3.1 | 招募 5~10 名 PS / Compositor 真实用户 | 名单确定 | 🟡 招募材料就绪，待发出 |
+| G3.1 | 招募 5~10 名 PS / 桌面版 Compositor 真实用户 | 名单确定 | 🟡 招募材料就绪，待发出 |
 | G3.2 | 指定任务：换天空 + 调色 + 导出 | ≥ 70% 独立完成 | ⬜ 测试包就绪 |
 | G3.3 | 三色灯反馈 | 绿灯多数 → G4；黄灯 → 换切口；红灯 → 重新评估 | ⬜ 判定规则已写进汇总页 |
 

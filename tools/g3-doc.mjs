@@ -5,7 +5,7 @@ import { writeFileSync } from 'node:fs'
 import { SECTIONS, TASKS } from '../src/g3/questions.ts'
 
 const lines = [
-  '# G3 反馈问卷',
+  '# ArtPS · G3 反馈问卷',
   '',
   '> 由 `src/g3/questions.ts` 生成（`npm run g3:doc`），问卷页面 `?g3=survey` 用的是同一份题目。改题目请改那个文件。',
   '',
@@ -37,7 +37,7 @@ lines.push(
   '- **NPS**：选 9–10 的占比 − 选 0–6 的占比。',
   '- **SEQ（单题难度）**：1–7，越高越容易，看各任务平均。',
   '- **独立完成（G3.2）**：三个必做任务都完成；有主持人记录时，看记录（最多 1 级帮助）；没有时，看自评（都选“完成了”且没有求助）。',
-  '- **三色灯（G3.3）**：看“对你来说，这个网页版工具是”一题。判定规则见 [README](README.md#判定规则)。',
+  '- **三色灯（G3.3）**：看“对你来说，ArtPS 是”一题。判定规则见 [README](README.md#判定规则)。',
   '',
 )
 writeFileSync('docs/g3/questionnaire.md', lines.join('\n'))

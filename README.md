@@ -1,6 +1,7 @@
-# Compositor Web
+# ArtPS
 
-[Compositor](https://github.com/robbietilton/Compositor)（macOS 开源修图/合成工具，MIT）的 Web 版。
+浏览器里的分层合成工具。基于开源项目 [Compositor](https://github.com/robbietilton/Compositor)（macOS 修图 / 合成工具，MIT）移植到 Web，
+项目文件与桌面版 Compositor 的 `.comp` 格式互通。
 目标与验收见 [GOALS.md](GOALS.md)。在线试用：https://jingchang0623-crypto.github.io/compositor-web/
 
 ## 运行

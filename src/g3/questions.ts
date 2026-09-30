@@ -120,7 +120,7 @@ export const SECTIONS: Section[] = [
   {
     id: 'value', title: '对你有没有用',
     questions: [
-      { id: 'light', type: 'single', text: '对你来说，这个网页版工具是：', options: [
+      { id: 'light', type: 'single', text: '对你来说，ArtPS 是：', options: [
         { value: 'green', label: '🟢 很有共鸣，我想继续用' },
         { value: 'yellow', label: '🟡 可有可无' },
         { value: 'red', label: '🔴 和我没什么关系' },

@@ -6,7 +6,7 @@ import { SUS_ITEMS, TASKS } from './questions'
 export type Answer = string | string[] | number
 
 export interface SurveyFile {
-  kind: 'compositor-g3-survey'
+  kind: 'artps-g3-survey'
   version: 1
   participant: string
   submittedAt: string
@@ -17,7 +17,7 @@ export interface SurveyFile {
 export type TaskResult = 'done' | 'partial' | 'failed' | 'skipped'
 
 export interface ObservationFile {
-  kind: 'compositor-g3-observation'
+  kind: 'artps-g3-observation'
   version: 1
   participant: string
   date: string

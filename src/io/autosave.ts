@@ -5,7 +5,7 @@ import type { PixelSource } from '../engine/compositor'
 import { imageFiles, packageProject, type SaveInput } from './save'
 import type { PackageFiles } from './comp'
 
-const DB = 'compositor-web'
+const DB = 'artps'
 const PROJECTS = 'projects'
 const FILES = 'files'
 

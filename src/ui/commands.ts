@@ -60,7 +60,7 @@ export async function pickFolder() {
   if (canWriteFolders()) {
     try {
       const folder = await (window as unknown as { showDirectoryPicker(o: object): Promise<FileSystemDirectoryHandle> })
-        .showDirectoryPicker({ mode: 'readwrite', id: 'compositor-open' })
+        .showDirectoryPicker({ mode: 'readwrite', id: 'artps-open' })
       return void openFrom(() => readFolder(folder), folder.name, folder)
     } catch (e) {
       if ((e as DOMException).name === 'AbortError') return

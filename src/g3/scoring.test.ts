@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { independent, nps, summarize, sus, type Participant, type SurveyFile } from './scoring'
 
 const survey = (id: string, answers: SurveyFile['answers']): Participant => ({
-  id, survey: { kind: 'compositor-g3-survey', version: 1, participant: id, submittedAt: '', env: {}, answers },
+  id, survey: { kind: 'artps-g3-survey', version: 1, participant: id, submittedAt: '', env: {}, answers },
 })
 const allSus = (v: number) => Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`sus${i + 1}`, v]))
 const done = { self_T1: 'done', self_T2: 'done', self_T3: 'done', asked_help: 'no' }
@@ -24,7 +24,7 @@ describe('scores', () => {
     const p = survey('P01', done)
     expect(independent(p)).toBe(true)
     p.observation = {
-      kind: 'compositor-g3-observation', version: 1, participant: 'P01', date: '', incidents: [], quotes: '',
+      kind: 'artps-g3-observation', version: 1, participant: 'P01', date: '', incidents: [], quotes: '',
       tasks: { T1: { result: 'done', assist: 2, seconds: 600, notes: '' }, T2: { result: 'done', assist: 0, seconds: 1, notes: '' }, T3: { result: 'done', assist: 0, seconds: 1, notes: '' } },
     }
     expect(independent(p)).toBe(false) // A hint (level 2) on the sky isn't on their own.

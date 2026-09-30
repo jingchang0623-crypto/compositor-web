@@ -58,9 +58,9 @@ export function Observe() {
   const exportSheet = () => {
     // Timers still going stop at the moment of export.
     const tasks = Object.fromEntries(Object.entries(sheet.tasks).map(([id, t]) => [id, { ...t, seconds: Math.round(elapsed(id)) }]))
-    downloadJSON({ kind: 'compositor-g3-observation', version: 1, ...sheet, tasks } satisfies ObservationFile, `${participant}-observation.json`)
+    downloadJSON({ kind: 'artps-g3-observation', version: 1, ...sheet, tasks } satisfies ObservationFile, `${participant}-observation.json`)
   }
-  const ok = independent({ id: participant, observation: { kind: 'compositor-g3-observation', version: 1, ...sheet } })
+  const ok = independent({ id: participant, observation: { kind: 'artps-g3-observation', version: 1, ...sheet } })
 
   return (
     <main className="g3 wide">
@@ -147,9 +147,9 @@ export function Results() {
       try {
         const data = JSON.parse(await f.text()) as SurveyFile | ObservationFile
         const id = data.participant?.toUpperCase()
-        if (!id || (data.kind !== 'compositor-g3-survey' && data.kind !== 'compositor-g3-observation')) throw new Error('不是 G3 的结果文件')
+        if (!id || (data.kind !== 'artps-g3-survey' && data.kind !== 'artps-g3-observation')) throw new Error('不是 G3 的结果文件')
         const p = byID.get(id) ?? { id }
-        if (data.kind === 'compositor-g3-survey') p.survey = data
+        if (data.kind === 'artps-g3-survey') p.survey = data
         else p.observation = data
         byID.set(id, p)
       } catch (e) {
